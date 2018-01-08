@@ -12,13 +12,26 @@ import java.util.List;
 
 public class test {
     public static void main(String[] args) throws TwitterException, IOException {
-        // The factory instance is re-useable and thread safe.
-        Twitter twitter = TwitterFactory.getSingleton();
-        List<Status> statuses = twitter.getHomeTimeline();
-        System.out.println("Showing home timeline.");
-        for (Status status : statuses) {
-            System.out.println(status.getUser().getName() + ":" +
-                    status.getText());
+        // gets Twitter instance with default credentials
+        Twitter twitter = new TwitterFactory().getInstance();
+        try {
+            List<Status> statuses;
+            String user;
+            if (args.length == 1) {
+                user = args[0];
+                statuses = twitter.getUserTimeline(user);
+            } else {
+                user = twitter.verifyCredentials().getScreenName();
+                statuses = twitter.getUserTimeline();
+            }
+            System.out.println("Showing @" + user + "'s user timeline.");
+            for (Status status : statuses) {
+                System.out.println("@" + status.getUser().getScreenName() + " - " + status.getText());
+            }
+        } catch (TwitterException te) {
+            te.printStackTrace();
+            System.out.println("Failed to get timeline: " + te.getMessage());
+            System.exit(-1);
         }
     }
 
